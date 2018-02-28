@@ -10,7 +10,7 @@ public class DeleteCustomer {
 		int customer_id = input.nextInt();
 		
 		String url = "jdbc:sqlserver://sqlserver.dmst.aueb.gr;" +
-                "databaseName=DB21;user=G521;password=499gr3753;";
+                "databaseName=***;user=*****;password=**********;";
 		Connection dbcon ;
 		Statement stmt;
 	  	
