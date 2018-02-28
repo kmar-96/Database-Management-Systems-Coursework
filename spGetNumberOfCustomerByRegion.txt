@@ -1,0 +1,12 @@
+CREATE PROCEDURE spGetNumberOfCustomerByRegion
+@region_id int
+as
+	BEGIN
+		DECLARE @cust_number int
+		SELECT @cust_number = count(customer_id)
+		FROM Customer
+		WHERE region_id = @region_id
+		PRINT 'Customers in region with id ' + cast(@region_id as varchar(10)) + ': ' + cast(@cust_number as varchar(10))
+	END
+
+EXECUTE spGetNumberOfCustomerByRegion 5

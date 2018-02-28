@@ -1,0 +1,40 @@
+CREATE PROCEDURE spGetProductDescriptionAndSuppliesBetweenDates
+@product_id int,
+@start_date Date,
+@end_date Date
+AS
+	BEGIN
+		DECLARE @descr varchar(220);
+		DECLARE @shipping_code int;
+		DECLARE @quantity int;
+		DECLARE @imerominia Date;
+
+		SELECT @descr = description
+		FROM Product
+		WHERE product_id = @product_id
+		
+		PRINT 'Description of product with id ' + cast(@product_id as varchar(10)) + ': ' + @descr
+	
+		DECLARE cursor1 CURSOR FOR
+		SELECT shipping_code, quantity, imerominia
+		FROM Supply
+		WHERE imerominia >= @start_date AND
+		      imerominia <= @end_date AND
+		      product_id = @product_id
+		
+		OPEN cursor1
+		FETCH NEXT FROM Cursor1 INTO @shipping_code, @quantity, @imerominia
+
+		WHILE(@@FETCH_STATUS = 0)
+			BEGIN
+				PRINT 'Shipping code: ' + cast(@shipping_code as varchar(10)) + ' Quantity: ' + cast(@quantity as varchar(10)) + ' Date: ' + cast(@imerominia as varchar(10))
+				FETCH NEXT FROM cursor1 INTO @shipping_code, @quantity, @imerominia
+			END
+		
+		CLOSE cursor1
+		DEALLOCATE cursor1
+	END
+
+/* DROP PROCEDURE spGetProductDescriptionAndSuppliesBetweenDates */
+
+EXECUTE spGetProductDescriptionAndSuppliesBetweenDates 2,'2010-10-28','2020-10-31'

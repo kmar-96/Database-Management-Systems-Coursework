@@ -1,0 +1,151 @@
+/* Query 1 */
+SELECT customer_id,afm,name,surname,address,phone
+FROM CUSTOMER
+
+/* Query 2 */
+SELECT customer_id,amount
+FROM PAYMENT
+WHERE imerominia >= '2012-5-12' AND imerominia <= '2012-5-22'
+
+/* Query 3 */
+Select order_date, Orders.order_id , product_id
+from Orders, Includes_Products
+Where Orders.order_id = Includes_Products.order_id
+
+/* Query 4 */
+Update Product
+set price = price * 1.03
+
+
+/* Query 5 */
+SELECT month(imerominia),sum(amount),avg(amount)
+From PAYMENT
+Where year(imerominia) = '2012'
+Group By month(imerominia)
+
+/* Query 6 */
+SELECT afm,Customer.name,surname
+FROM Orders,Includes_Products, Product, Customer
+WHERE Orders.order_id = Includes_products.order_id AND 
+      Includes_products.product_id = Product.product_id AND
+      Orders.customer_id = Customer.customer_id AND
+      year(order_date) = '2013' AND
+      month(order_date) = '1'
+Group By Customer.customer_id,afm,Customer.name,surname
+Having sum(price*Includes_products.quantity) > 2500
+
+/* Query 7 */
+SELECT customer_id,category_id, sum(price*Includes_products.quantity)
+FROM Orders,Includes_Products, Product
+Where Orders.order_id = Includes_products.order_id AND 
+	  Includes_products.product_id = Product.product_id
+Group By customer_id, category_id
+
+/* Query 8 */
+SELECT region_id,category_id, avg(price*Includes_products.quantity) as Average_Sales
+FROM  Orders,Customer,Includes_products,Product
+WHERE Orders.customer_id = Customer.customer_id AND
+	  Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id
+Group By region_id,category_id
+
+/* Query 9 */
+CREATE VIEW V1 (Month,MonthSales) AS
+SELECT month(order_date),sum(price*Includes_products.quantity)
+FROM Orders,Includes_products,Product
+WHERE Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id AND
+	  year(order_date) = 2012
+GROUP BY month(order_date)
+
+CREATE VIEW V2 (YearTotalSales) AS
+SELECT sum(price*Includes_products.quantity)
+FROM Orders,Includes_products,Product
+WHERE Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id AND
+	  year(order_date) = 2012
+
+Select Month, MonthSales/YearTotalSales as Monthly_Percentage_Sales
+FROM V1,V2
+
+/* Query 10 */
+CREATE VIEW V3 (Customer, month, CustomerMonthAverage) AS
+SELECT customer_id, month(order_date), avg(price*Includes_products.quantity)
+FROM Orders,Includes_products,Product
+WHERE Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id
+GROUP BY customer_id, month(order_date)
+
+CREATE VIEW V4 (month,MonthAverage) AS
+SELECT month(order_date), avg(price*Includes_products.quantity)
+FROM Orders,Includes_products,Product
+WHERE Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id
+GROUP BY month(order_date)
+
+SELECT V3.month, count(*)
+FROM V3,V4
+WHERE V3.month = V4.month AND
+	  CustomerMonthAverage > MonthAverage
+GROUP BY V3.month
+
+/* Query 11 */
+CREATE VIEW V5 (month, MonthTotalSales) AS
+SELECT month(order_date), sum(price*Includes_products.quantity)
+FROM Orders,Includes_products,Product
+WHERE Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id AND
+	  year(order_date) = 2011
+GROUP BY month(order_date)
+
+CREATE VIEW V6 (month, MonthTotalSales) AS
+SELECT month(order_date), sum(price*Includes_products.quantity)
+FROM Orders,Includes_products,Product
+WHERE Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id AND
+	  year(order_date) = 2012
+GROUP BY month(order_date)
+
+SELECT V6.month, V6.MonthTotalSales / V5.MonthTotalSales
+FROM V5,V6
+WHERE V5.month = V6.month
+
+/* Query 12 */
+CREATE VIEW V7 (month,avg_sales,total_sales,num_of_sales) AS
+SELECT month(order_date), avg(price*Includes_products.quantity), sum(price*Includes_products.quantity), count(*)
+FROM Orders,Includes_products,Product
+WHERE Orders.order_id = Includes_products.order_id AND
+	  Includes_products.product_id = Product.product_id AND
+	  year(order_date) = 2012
+GROUP BY month(order_date)
+
+CREATE VIEW V8 (month, avg_prev_months) AS
+SELECT V7A.month, sum(V7B.total_sales)/sum(V7B.num_of_sales)
+FROM V7 as V7A, V7 as V7B
+WHERE V7A.month > V7B.month
+GROUP BY V7A.month
+
+SELECT V7.month, V7.avg_sales, V8.avg_prev_months
+FROM V7, V8
+WHERE V7.month = V8.month
+ORDER BY month ASC
+
+/* Query 13 */
+SELECT product_id
+FROM Supply,Supplier
+WHERE Supply.supplier_id = Supplier.supplier_id
+GROUP BY product_id
+HAVING min(region_id)=max(region_id) AND 
+       min(Supply.supplier_id) != max(Supply.supplier_id)
+
+/* Query 14 */
+CREATE VIEW V9 (promitheftis, Product_supplied) AS
+SELECT supplier_id, product_id
+FROM Supply
+GROUP BY supplier_id, product_id
+
+SELECT distinct order_id
+FROM Includes_products, V9
+WHERE product_id = Product_supplied
+GROUP BY order_id, promitheftis
+HAVING count(*) >= 3

@@ -1,0 +1,497 @@
+
+CREATE TABLE Region (
+region_id INT NOT NULL IDENTITY(1,1),
+name VARCHAR(50),
+population INT,
+PRIMARY KEY (region_id) );
+
+CREATE TABLE Supplier (
+supplier_id INT NOT NULL IDENTITY(1,1),
+afm VARCHAR(50) ,
+brand VARCHAR(50),
+address VARCHAR(50),
+phone VARCHAR(50),
+region_id INT NOT NULL,
+PRIMARY KEY(supplier_id),
+FOREIGN KEY(region_id) REFERENCES Region(region_id),
+UNIQUE(afm) );
+
+CREATE TABLE Category (
+category_id INT NOT NULL IDENTITY(1,1),
+description VARCHAR(255),
+PRIMARY KEY(category_id) );
+
+CREATE TABLE Product (
+product_id INT NOT NULL IDENTITY(1,1),
+quantity INT,
+name VARCHAR(50),
+description VARCHAR(255),
+price REAL,
+category_id INT NOT NULL,
+PRIMARY KEY(product_id),
+FOREIGN KEY(category_id) REFERENCES Category(category_id),
+CHECK (price >= 0) );
+
+CREATE TABLE Supply (
+shipping_code INT NOT NULL IDENTITY(1,1),
+supplier_id INT NOT NULL,
+product_id INT NOT NULL,
+imerominia DATE,
+quantity INT,
+PRIMARY KEY(shipping_code),
+FOREIGN KEY(supplier_id) REFERENCES Supplier(supplier_id),
+FOREIGN KEY(product_id) REFERENCES Product(product_id),
+CHECK (quantity > 0) );
+
+CREATE TABLE Customer (
+customer_id INT NOT NULL IDENTITY(1,1),
+name VARCHAR(50),
+surname VARCHAR(50),
+afm VARCHAR(50),
+address VARCHAR(50),
+phone VARCHAR(50),
+region_id INT NOT NULL,
+PRIMARY KEY(customer_id),
+FOREIGN KEY(region_id) REFERENCES Region(region_id),
+UNIQUE(afm) );
+
+CREATE TABLE Frequent_Customer (
+customer_id INT NOT NULL,
+credit_limit REAL,
+balance REAL,
+PRIMARY KEY(customer_id),
+FOREIGN KEY(customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE,
+CHECK (credit_limit >= 0),
+CHECK (balance <= credit_limit) );
+
+CREATE TABLE Payment (
+customer_id INT NOT NULL,
+imerominia Date NOT NULL,
+amount REAL NOT NULL,
+PRIMARY KEY(customer_id,imerominia,amount),
+FOREIGN KEY(customer_id) REFERENCES Frequent_Customer(customer_id) ON DELETE CASCADE,
+CHECK (amount > 0) );
+
+CREATE TABLE Orders (
+order_id INT NOT NULL IDENTITY(1,1),
+customer_id INT NOT NULL,
+order_date DATE,
+shipping_date DATE,
+PRIMARY KEY (order_id),
+FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE);
+
+CREATE TABLE Includes_Products (
+order_id INT NOT NULL,
+product_id INT NOT NULL,
+quantity INT,
+PRIMARY KEY(order_id,product_id),
+FOREIGN KEY(order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
+FOREIGN KEY(product_id) REFERENCES Product(product_id),
+CHECK (quantity > 0) );
+
+/*
+DROP TABLE Includes_Products;
+DROP TABLE Orders;
+DROP TABLE Payment;
+DROP TABLE Frequent_Customer;
+DROP TABLE Customer;
+DROP TABLE Supply;
+DROP TABLE Product;
+DROP TABLE Category;
+DROP TABLE Supplier;
+DROP TABLE Region;
+*/
+
+INSERT INTO Region(name,population) VALUES ('Kifisia',70000);
+INSERT INTO Region(name,population) VALUES ('Chalandri',75000);
+INSERT INTO Region(name,population) VALUES ('Zografou',71000);
+INSERT INTO Region(name,population) VALUES ('Galatsi',60000);
+INSERT INTO Region(name,population) VALUES ('Peristeri',140000);
+
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('165234879','Sklavenitis','Athinas 24','210-6213777',3);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('451238967','Mpourantas','Archarnon 5','210-7244381',2);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('784596123','Masoutis','Voukourestiou 13','210-7854221',1);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('589467213','Pitsos','Sofokleous 77','210-7766255',4);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('225468739','Vivartia','Aiolou 50','210-7899822',5);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('845697223','AZ Vassilopoulos','Stadiou 44','210-7455878',4);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('639821547','Grigoris','Ermou 13','210-7121555',1);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('845592316','Kyknos','Alexandras 28','210-7899622',5);
+INSERT INTO Supplier(afm,brand,address,phone,region_id) VALUES ('485321668','AZ Yannaco','Spyrou Loui 44','210-7466878',4);
+
+INSERT INTO Category(description) VALUES ('Software');
+INSERT INTO Category(description) VALUES ('Epipla');
+INSERT INTO Category(description) VALUES ('Grafiki yli');
+INSERT INTO Category(description) VALUES ('Vivlia');
+INSERT INTO Category(description) VALUES ('Ilektronika');
+INSERT INTO Category(description) VALUES ('Kouzina');
+
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (46,'Eset Antivirus','Internet Security Software',10,1);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (44,'Adobe CS6','Creative Design & Web Premium',10,1);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (14,'Eksipno Trapezi','I pio eksipni karekla',10,2);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (34,'Karekla','Karekla me rodakia',10,2);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (112,'Blanco','Sbinei ta panta',10,3);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (256,'Stilo bic','Mple stilo pachous 7mm',10,3);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (22,'Igesia','o,ti prepei na kserete gia tin igesia',20,4);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (32,'DBMS','Enas pliris odigos gia vaseis',20,4);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (6,'Gaming pc','paizei ta panta',20,5);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (11,'Iphone','to kalytero smartphone',20,5);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (45,'Katsarola','krataei polla xronia',20,6);
+INSERT INTO Product(quantity,name,description,price,category_id) VALUES (31,'Tigani','magirevi iperocha',20,6);
+
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (1,1,'2016-10-30',5);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (1,2,'2013-10-24',3);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (1,4,'2014-08-11',6);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (1,5,'2016-06-10',4);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (1,8,'2017-10-13',4);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (2,1,'2016-10-30',5);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (2,3,'2013-10-21',3);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (2,5,'2014-08-11',6);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (2,9,'2016-06-11',4);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (2,11,'2017-10-13',4);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (2,12,'2015-04-30',5);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (3,4,'2017-11-13',8);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (3,6,'2015-12-20',7);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (3,9,'2017-11-13',8);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (3,11,'2015-12-20',7);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (4,2,'2017-08-23',4);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (4,6,'2015-04-30',7);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (4,7,'2017-08-25',5);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (4,8,'2015-04-22',3);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (5,11,'2017-02-13',4);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (5,12,'2015-04-30',3);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (6,7,'2017-10-13',4);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (6,9,'2017-05-06',2);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (8,8,'2017-07-13',9);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (4,10,'2015-04-28',3);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (6,10,'2015-04-28',3);
+INSERT INTO Supply(supplier_id,product_id,imerominia,quantity) VALUES (9,10,'2015-04-28',3);
+/* To proion me product_id = (10) exei 3 promitheutes apo tin idia perioxi me id=4 */
+
+INSERT INTO Customer(name,surname,afm,address,phone,region_id) VALUES ('Kostas','Pap','1642358789','Stadiou 14','210-62314568',3);
+INSERT INTO Customer(name,surname,afm,address,phone,region_id) VALUES ('Mitsos','Dop','5123658798','Aleksandras 12','210-62412577',2);
+INSERT INTO Customer(name,surname,afm,address,phone,region_id) VALUES ('Giannis','Nas','1912358639','Eirinis 6','210-68312466',1);
+INSERT INTO Customer(name,surname,afm,address,phone,region_id) VALUES ('Nikos','Sip','485763219','Athinas 64','210-6877424',4);
+INSERT INTO Customer(name,surname,afm,address,phone,region_id) VALUES ('Petros','Zoump','778958789','Siggrou 22','210-62771128',5);
+
+INSERT INTO Frequent_Customer(customer_id,credit_limit,balance) VALUES (2,200,68.87);
+INSERT INTO Frequent_Customer(customer_id,credit_limit,balance) VALUES (3,300,49.23);
+INSERT INTO Frequent_Customer(customer_id,credit_limit,balance) VALUES (5,300,49.23);
+
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (3,'2012-01-18',100);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (3,'2012-01-14',150);
+
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (3,'2012-03-11',100);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (3,'2012-03-11',200);
+
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (2,'2012-05-11',100);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (2,'2012-05-13',10);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (2,'2012-05-17',15);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (2,'2012-05-21',25);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (2,'2012-05-23',100);
+-- Query 2: Expected 10+15+25 = 50
+
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (5,'2012-05-10',100);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (5,'2012-05-14',10);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (5,'2012-05-16',20);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (5,'2012-05-20',30);
+INSERT INTO Payment(customer_id,imerominia,amount) VALUES (5,'2012-05-23',100);
+-- Query 2: Expected 10+20+30 = 60
+
+
+-- 2011
+
+-- January
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2011-01-05','2012-01-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2011-01-15','2012-01-30');
+
+-- February
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2011-02-05','2012-02-28');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2011-02-15','2012-02-28');
+
+-- March
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2011-03-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (5,'2011-03-15','2012-03-30');
+
+-- April
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2011-04-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2011-04-15','2012-03-30');
+
+-- May
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2011-05-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2011-05-15','2012-03-30');
+
+-- June
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2011-06-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2011-06-15','2012-03-30');
+
+-- July
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2011-07-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (5,'2011-07-15','2012-03-30');
+
+-- August
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2011-08-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2011-08-15','2012-03-30');
+
+-- September
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2011-09-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2011-09-15','2012-03-30');
+
+-- October
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2011-10-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (5,'2011-10-15','2012-03-30');
+
+-- November
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2011-11-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2011-11-15','2012-03-30');
+
+-- December
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2011-12-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2011-12-15','2012-03-30');
+-- Sunolo 24 orders
+
+
+-- 2012
+
+-- January
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2012-01-5','2012-01-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2012-01-15','2012-01-30');
+-- February
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2012-02-5','2012-02-28');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2012-02-15','2012-02-28');
+
+-- March
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2012-03-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2012-03-15','2012-03-30');
+
+-- April
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2012-04-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2012-04-15','2012-03-30');
+
+-- May
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2012-05-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2012-05-15','2012-03-30');
+
+-- June
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2012-06-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2012-06-15','2012-03-30');
+
+-- July
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2012-07-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (5,'2012-07-15','2012-03-30');
+
+-- August
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2012-08-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2012-08-15','2012-03-30');
+
+-- September
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2012-09-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (5,'2012-09-15','2012-03-30');
+
+-- October
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (4,'2012-10-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (5,'2012-10-15','2012-03-30');
+
+-- November
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2012-11-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (5,'2012-11-15','2012-03-30');
+
+-- December
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2012-12-5','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (3,'2012-12-15','2012-03-30');
+-- Sunolo 48 orders
+
+-- QUERY 14
+INSERT INTO Orders (customer_id,order_date,shipping_date) VALUES (3,'2017-12-18','2018-12-18');
+INSERT INTO Orders (customer_id,order_date,shipping_date) VALUES (4,'2017-12-18','2018-12-18');
+
+-- Jan 2011
+-- Order 1
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (1,2,300);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (1,3,20);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (1,4,20);
+--Order 2
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (2,3,100);
+
+-- Feb 2011
+-- Order 3
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (3,2,200);
+-- Order 4
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (4,3,100);
+
+-- Mar 2011
+-- Order 5
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (5,1,200);
+-- Order 6
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (6,3,200);
+
+-- Apr 2011
+-- Order 7
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (7,2,300);
+-- Order 8
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (8,3,400);
+
+-- May 2011
+-- Order 9
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (9,1,100);
+-- Order 10
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (10,3,200);
+
+-- June 2011
+-- Order 11
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (11,2,400);
+-- Order 12
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (12,3,500);
+
+-- July 2011
+-- Order 13
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (13,1,500);
+
+-- Order 14
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (14,3,400);
+
+-- August 2011
+-- Order 15
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (15,3,300);
+-- Order 16
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (16,2,400);
+
+-- Sept 2011
+-- Order 17
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (17,1,200);
+-- Order 18
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (18,3,300);
+
+-- Oct 2011
+-- Order 19
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (19,1,700);
+-- Order 20
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (20,3,200);
+
+-- Nov 2011
+-- Order 21
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (21,1,800);
+-- Order 22
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (22,3,300);
+
+-- Dec 2011
+-- Order 23
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (23,1,400);
+-- Order 24
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (24,3,100);
+
+-- Jan 2012
+-- Order 25
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (25,1,500);
+-- Order 26
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (26,3,800);
+
+-- Feb 2012
+-- Order 27
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (27,1,100);
+-- Order 28
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (28,3,300);
+
+-- March 2012
+-- Order 29
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (29,1,100);
+-- Order 30
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (30,3,400);
+
+-- Apr 2012
+-- Order 31
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (31,1,100);
+-- Order 32
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (32,3,400);
+
+-- May 2012
+-- Order 33
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (33,1,100);
+-- Order 34
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (34,3,200);
+
+-- June 2012
+-- Order 35
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (35,1,100);
+-- Order 36
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (36,3,400);
+
+-- July 2012
+-- Order 37
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (37,1,200);
+-- Order 38
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (38,3,300);
+
+-- Aug 2012
+-- Order 39
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (39,1,200);
+-- Order 40 
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (40,3,300);
+
+-- Sept 2012
+-- Order 41
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (41,1,200);
+--Order 42
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (42,3,100);
+
+-- Oct 2012
+--Order 43
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (43,1,200);
+--Order 44
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (44,3,200);
+
+-- Nov 2012
+-- Order 45
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (45,1,300);
+-- Order 46
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (46,3,300);
+
+-- Dec 2012
+-- Order 47
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (47,1,100);
+-- Order 48
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (48,3,500);
+
+-- Jan 2013
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (1,'2013-01-15','2012-03-30');
+INSERT INTO Orders(customer_id,order_date,shipping_date) VALUES (2,'2013-01-22','2012-03-30');
+
+-- Jan 2013
+-- Order 49
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (49,1,150);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (49,2,150);
+-- Order 50
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (50,1,3);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (50,2,3);
+-- Order 51
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (51,1,2);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (51,2,3);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (51,4,4);
+-- Order 52
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (52,12,2);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (52,7,3);
+INSERT INTO Includes_Products(order_id,product_id,quantity) VALUES (52,8,4);
+
+/*
+DROP TABLE Includes_Products;
+DROP TABLE Orders;
+DROP TABLE Payment;
+DROP TABLE Frequent_Customer;
+DROP TABLE Customer;
+DROP TABLE Supply;
+DROP TABLE Product;
+DROP TABLE Category;
+DROP TABLE Supplier;
+DROP TABLE Region;
+*/
+
+/*
+DROP VIEW V1
+DROP VIEW V2
+DROP VIEW V3
+DROP VIEW V4
+DROP VIEW V5
+DROP VIEW V6
+DROP VIEW V7
+DROP VIEW V8
+DROP VIEW V9
+*/
